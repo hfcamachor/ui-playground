@@ -3,6 +3,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import { useEffect, useRef, useState } from "react";
+import clsx from "clsx";
 
 export default function Home() {
   const [dataMouseDownPoint, setDataMouseDownPoint] = useState<number>(0);
@@ -24,6 +25,26 @@ export default function Home() {
     };
   }, []);
 
+  const imageParalax = (currentPercentage: number) => {
+    const parImages = imageTracker.current?.querySelectorAll(
+      ".par-image"
+    ) as NodeListOf<HTMLImageElement>;
+    const parImagesArray = parImages ? [...parImages] : [];
+
+    parImages &&
+      parImagesArray.map((parImage) => {
+        parImage.animate(
+          {
+            objectPosition: `${currentPercentage + 100}% 50%`,
+          },
+          {
+            duration: 1200,
+            fill: "forwards",
+          }
+        );
+      });
+  };
+
   useEffect(() => {
     if (isDragging) {
       const mouseDelta =
@@ -34,7 +55,16 @@ export default function Home() {
       if (imageTracker.current && percentage < 0 && percentage > -100) {
         const imageTrackDiv = imageTracker.current;
 
-        imageTrackDiv.style.transform = `translate(${percentage}%, -50%)`;
+        imageTrackDiv.animate(
+          {
+            transform: `translate(${percentage}%, -50%)`,
+          },
+          {
+            duration: 1200,
+            fill: "forwards",
+          }
+        );
+        imageParalax(percentage);
       }
 
       setPercentage(percentage);
@@ -70,11 +100,11 @@ export default function Home() {
     const elements = [];
     for (let index = 1; index <= 8; index++) {
       elements.push(
-        <div key={`image-${index}`} className={styles.image}>
+        <div key={`image-${index}`}>
           <Image
             src={`/posters/poster-${index}.jpg`}
             alt="Vercel Logo"
-            className={styles.image}
+            className={clsx(styles.image, "par-image")}
             width={500}
             height={500}
             draggable={false}
